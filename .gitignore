@@ -1,3 +1,4 @@
+app/src/main/java/com/softwaredroid/dictationmaster/llm/CohereAPIKey.java
 
 *.iml
 .gradle

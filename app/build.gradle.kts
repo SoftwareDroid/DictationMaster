@@ -35,7 +35,7 @@ android {
 }
 
 dependencies {
-
+    implementation("com.cohere:cohere-java:+")
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.constraintlayout)
