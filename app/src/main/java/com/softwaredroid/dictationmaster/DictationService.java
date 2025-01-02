@@ -16,6 +16,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.widget.Toast;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -29,12 +30,14 @@ import java.util.TreeMap;
 /**
  * NOTE: do not rename class then app_dev.sh doesn't work anymore
  */
-public class DictationService extends AccessibilityService
+public class DictationService extends AccessibilityService implements IDictationService
 {
-
+    private static final String CHANNEL_ID = "MyForegroundServiceChannel";
+    private Handler handler = new Handler(Looper.getMainLooper());
     private CrashHandler crashHandler;
     private HashSet<String> appliedApps;
-
+    private TextManipulator textManipulator;
+    private boolean worksInAnyApp = true;
     @SuppressLint("UnspecifiedRegisterReceiverFlag")
     @Override
     public void onServiceConnected()
@@ -44,6 +47,7 @@ public class DictationService extends AccessibilityService
         Thread.setDefaultUncaughtExceptionHandler(crashHandler);
         appliedApps = new HashSet<>();
         appliedApps.add("ru.vsms");
+        textManipulator = new TextManipulator(this,this);
     }
 
     @Override
@@ -54,7 +58,7 @@ public class DictationService extends AccessibilityService
             return;
         }
         CharSequence app = event.getPackageName();
-        if (app != null && appliedApps.contains(app.toString()))
+        if (app != null && (worksInAnyApp || appliedApps.contains(app.toString())))
         {
 
 
@@ -68,7 +72,7 @@ public class DictationService extends AccessibilityService
                         CharSequence text = source.getText(); // Extract the text
                         if (text != null)
                         {
-                            String newText = TextManipulator.searchAndApplyCommands(text.toString());
+                            String newText = textManipulator.searchAndApplyCommands(text.toString());
                             if (newText != null)
                             {
                                 new Handler(Looper.getMainLooper()).post(() -> {
@@ -83,9 +87,9 @@ public class DictationService extends AccessibilityService
                             }
                         }
                     }
-            break;
-            default:
-                break;
+                    break;
+                default:
+                    break;
 //                case AccessibilityEvent.TYPE_VIEW_FOCUSED:
 //                    // This event is triggered when a view gains focus
 //                    AccessibilityNodeInfo focusedSource = event.getSource();
@@ -100,23 +104,32 @@ public class DictationService extends AccessibilityService
 //                    }
 //                    break;
 
-            // Handle other event types as needed
+                // Handle other event types as needed
+            }
         }
     }
-}
 
 
-@Override
-public void onInterrupt()
-{
-    Log.d("a", "a");
-}
+    @Override
+    public void onInterrupt()
+    {
+        Log.d("a", "a");
+    }
 
+    private void showToast(String message)
+    {
+        handler.post(() -> Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show());
+    }
 
-@Override
-public void onDestroy()
-{
-    super.onDestroy();
-}
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+    }
 
+    @Override
+    public void showNotification(String text)
+    {
+        showToast(text);
+    }
 }

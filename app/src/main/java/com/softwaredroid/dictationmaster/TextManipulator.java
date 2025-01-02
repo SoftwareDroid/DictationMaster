@@ -1,38 +1,67 @@
 package com.softwaredroid.dictationmaster;
 
-import java.util.Map;
+import android.content.Context;
 
 public class TextManipulator
 {
-    public static String DELETE_WORD_COMMAND = "lösche wort";
-    public static String DELETE_SENTENCE_COMMAND = "lösche satz";
+    private boolean enabled = true;
+    public String TURN_ON_OFF_COMMAND = "sakura";
+    public String DELETE_WORD_COMMAND = "lösche wort";
+    public String DELETE_SENTENCE_COMMAND = "lösche satz";
+    private int DELETE_SENTENCE_COMMAND_NUMBER_TO_DELETE = 0;
+    private IDictationService service;
+    private Context context;
 
-    public static String searchAndApplyCommands(String text)
+
+
+    TextManipulator(IDictationService service, Context context)
+    {
+        // delete the entered text plus one more
+        DELETE_SENTENCE_COMMAND_NUMBER_TO_DELETE = DELETE_WORD_COMMAND.split(" ").length + 1;
+        this.service = service;
+        this.context = context;
+    }
+
+    public String searchAndApplyCommands(String text)
     {
         String lowerCaseText = text.toLowerCase();
-
-        if (lowerCaseText.contains(DELETE_WORD_COMMAND))
+        if (lowerCaseText.contains(TURN_ON_OFF_COMMAND))
         {
-            return deleteLastWord(text);
+            setActivationState(!enabled);
+            service.showNotification(enabled ? context.getString(R.string.sakura_awake) : context.getString(R.string.sakura_sleeps_now));
+            // remove entered commands
+            return deleteLastWords(text, 1);
         }
 
-        if (lowerCaseText.contains(DELETE_SENTENCE_COMMAND))
+        if (enabled)
         {
-            return deleteLastSentence(text);
-        }
+            if (lowerCaseText.contains(DELETE_WORD_COMMAND))
+            {
+                return deleteLastWords(text, DELETE_SENTENCE_COMMAND_NUMBER_TO_DELETE);
+            }
 
+            if (lowerCaseText.contains(DELETE_SENTENCE_COMMAND))
+            {
+                return deleteLastSentence(text);
+            }
+        }
         return null;
     }
 
-    private static String deleteLastWord(String text)
+    private void setActivationState(boolean newState)
+    {
+        enabled = newState;
+    }
+
+    private String deleteLastWords(String text, int numberToDelete)
     {
         // Split the text into words
         String[] words = text.split(" ");
-        if (words.length > 3)
+        if (words.length > numberToDelete - 1)
         {
             // Remove the last word
             StringBuilder newText = new StringBuilder();
-            for (int i = 0; i < words.length - 3; i++)
+            for (int i = 0; i < words.length - numberToDelete; i++)
             {
                 newText.append(words[i]).append(" ");
             }
@@ -41,7 +70,7 @@ public class TextManipulator
         return text; // Return original text if no words to delete
     }
 
-    private static String deleteLastSentence(String text)
+    private String deleteLastSentence(String text)
     {
         // Split the text into sentences
         String[] sentences = text.split("(?<=[.!?])\\s*");
