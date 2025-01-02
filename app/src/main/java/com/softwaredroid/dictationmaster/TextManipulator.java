@@ -5,13 +5,12 @@ import android.content.Context;
 public class TextManipulator
 {
     private boolean enabled = true;
-    public String TURN_ON_OFF_COMMAND = "sakura";
+    public String TURN_ON_OFF_COMMAND = "Sakura";
     public String DELETE_WORD_COMMAND = "lösche wort";
     public String DELETE_SENTENCE_COMMAND = "lösche satz";
     private int DELETE_SENTENCE_COMMAND_NUMBER_TO_DELETE = 0;
     private IDictationService service;
     private Context context;
-
 
 
     TextManipulator(IDictationService service, Context context)
@@ -25,22 +24,23 @@ public class TextManipulator
     public String searchAndApplyCommands(String text)
     {
         String lowerCaseText = text.toLowerCase();
-        if (lowerCaseText.contains(TURN_ON_OFF_COMMAND))
+        if (text.endsWith(TURN_ON_OFF_COMMAND))
         {
             setActivationState(!enabled);
             service.showNotification(enabled ? context.getString(R.string.sakura_awake) : context.getString(R.string.sakura_sleeps_now));
             // remove entered commands
-            return deleteLastWords(text, 1);
+
+            return text.substring(0, text.length() - TURN_ON_OFF_COMMAND.length());
         }
 
         if (enabled)
         {
-            if (lowerCaseText.contains(DELETE_WORD_COMMAND))
+            if (lowerCaseText.endsWith(DELETE_WORD_COMMAND))
             {
-                return deleteLastWords(text, DELETE_SENTENCE_COMMAND_NUMBER_TO_DELETE);
+                return deleteLastWords(text.substring(0, text.length() - DELETE_WORD_COMMAND.length()), 1);
             }
 
-            if (lowerCaseText.contains(DELETE_SENTENCE_COMMAND))
+            if (lowerCaseText.endsWith(DELETE_SENTENCE_COMMAND))
             {
                 return deleteLastSentence(text);
             }
