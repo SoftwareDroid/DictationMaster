@@ -35,6 +35,7 @@ import java.util.TreeMap;
  */
 public class DictationService extends AccessibilityService implements IDictationService
 {
+    private Handler autoGoogleMicClickHandler;
     private HighlightOverlay highlightOverlay;
     private static final String CHANNEL_ID = "MyForegroundServiceChannel";
     private Handler handler = new Handler(Looper.getMainLooper());
@@ -56,7 +57,6 @@ public class DictationService extends AccessibilityService implements IDictation
     }
 
 
-
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event)
     {
@@ -67,6 +67,31 @@ public class DictationService extends AccessibilityService implements IDictation
         CharSequence app = event.getPackageName();
         if (app != null && (worksInAnyApp || appliedApps.contains(app.toString())))
         {
+            if (app.toString().equals("com.google.android.inputmethod.latin"))
+            {
+                if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
+                {
+                    String text = event.getText().toString();
+                    if (text.equals("[Spracheingabe beendet]") && textManipulator.isEnabled())
+                    {
+                        // if the Gboard stops mic input auto start it Agai
+                        clickOnGoardMic();
+                    } else if (text.startsWith("[Tastatur") && text.endsWith("ausgeblendet]"))
+                    {
+                        // Stop clicking further
+                        if (this.autoGoogleMicClickHandler != null)
+                        {
+                            this.autoGoogleMicClickHandler.removeCallbacks(null);
+                        }
+                    } else if (textManipulator.startMicInputAtKeyboardOpening() && text.startsWith("[Tastatur") && text.endsWith("wird angezeigt]"))
+                    {
+                        //user opened keyboard
+                        clickOnGoardMic();
+                    }
+
+                }
+            }
+
             switch (event.getEventType())
             {
                 case AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED:
@@ -152,25 +177,29 @@ public class DictationService extends AccessibilityService implements IDictation
         super.onDestroy();
     }
 
-    public void performClickAtPosition(float x, float y) {
+    public void performClickAtPosition(float x, float y, boolean highlight)
+    {
         // Define the area to highlight (for example, a 100x100 square)
         Rect highlightRect = new Rect((int) x, (int) y, (int) x + 15, (int) y + 15);
 
         // Show the highlight
-        highlightOverlay = new HighlightOverlay(this);
-        highlightOverlay.showHighlight(highlightRect);
-        simulateClick(x, y);
-        // Simulate a click after a delay (e.g., 1 second)
-        new Handler().postDelayed(() -> {
-            // Simulate the click
+        if (highlight)
+        {
+            highlightOverlay = new HighlightOverlay(this);
+            highlightOverlay.showHighlight(highlightRect);
+            new Handler().postDelayed(() -> {
+                // Simulate the click
 
-            // Remove the highlight
-            highlightOverlay.removeHighlight();
-        }, 1500);
+                // Remove the highlight
+                highlightOverlay.removeHighlight();
+            }, 1500);
+        }
+        simulateClick(x, y);
     }
 
 
-    private void simulateClick(float x, float y) {
+    private void simulateClick(float x, float y)
+    {
         // Create a path for the gesture
         Path path = new Path();
         path.moveTo(x, y);
@@ -196,11 +225,12 @@ public class DictationService extends AccessibilityService implements IDictation
     @Override
     public void clickOnGoardMic()
     {
-        new Handler().postDelayed(() -> {
-            performClickAtPosition(430, 780);
-
+        autoGoogleMicClickHandler = new Handler();
+        autoGoogleMicClickHandler.postDelayed(() -> {
+            performClickAtPosition(430, 780, false);
         }, 500);
-
     }
+
+
 }
 

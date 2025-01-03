@@ -10,15 +10,23 @@ public class TextManipulator
     public String DELETE_TWO_WORDS_COMMAND = "lösche zwei wörter";
     public String DELETE_THREE_WORDS_COMMAND = "lösche drei wörter";
     public String DELETE_SENTENCE_COMMAND = "lösche satz";
-    private int DELETE_SENTENCE_COMMAND_NUMBER_TO_DELETE = 0;
     private IDictationService service;
     private Context context;
+    private boolean autoStartKeyboardIfAwake = true;
 
+    public boolean isEnabled()
+    {
+        return enabled;
+    }
+
+    public boolean startMicInputAtKeyboardOpening()
+    {
+        return enabled && autoStartKeyboardIfAwake;
+    }
 
     TextManipulator(IDictationService service, Context context)
     {
         // delete the entered text plus one more
-        DELETE_SENTENCE_COMMAND_NUMBER_TO_DELETE = DELETE_WORD_COMMAND.split(" ").length + 1;
         this.service = service;
         this.context = context;
     }
