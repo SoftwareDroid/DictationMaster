@@ -2,6 +2,7 @@
     android:accessibilityEventTypes="typeAllMask"
     android:packageNames="@null"
     android:accessibilityFeedbackType="feedbackAllMask"
+    android:canPerformGestures="true"
     android:accessibilityFlags="flagDefault|flagIncludeNotImportantViews"
     android:canRetrieveWindowContent="true"
     android:notificationTimeout="100" />

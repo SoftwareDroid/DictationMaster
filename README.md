@@ -4,4 +4,4 @@ Improves the Handfree Dication on Android by detect delete sentence and delete w
 
 # TODO
  - Config on SD which can define replace word table and other command words (or database)
-- Maybe translator function.
+- Maybe translator function. // Befehle zum besser schreiben, übersetzen nach English

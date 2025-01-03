@@ -14,7 +14,6 @@ public class ChatPost
     public static String test(String message)
     {
         Cohere cohere = Cohere.builder().token(CohereAPIKey.KEY).clientName("snippet").build();
-
         NonStreamedChatResponse response = cohere.chat(
                 ChatRequest.builder()
                         .message(message).build());

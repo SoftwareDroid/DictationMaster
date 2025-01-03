@@ -7,6 +7,8 @@ public class TextManipulator
     private boolean enabled = true;
     public String TURN_ON_OFF_COMMAND = "Sakura";
     public String DELETE_WORD_COMMAND = "lösche wort";
+    public String DELETE_TWO_WORDS_COMMAND = "lösche zwei wörter";
+    public String DELETE_THREE_WORDS_COMMAND = "lösche drei wörter";
     public String DELETE_SENTENCE_COMMAND = "lösche satz";
     private int DELETE_SENTENCE_COMMAND_NUMBER_TO_DELETE = 0;
     private IDictationService service;
@@ -38,6 +40,14 @@ public class TextManipulator
             if (lowerCaseText.endsWith(DELETE_WORD_COMMAND))
             {
                 return deleteLastWords(text.substring(0, text.length() - DELETE_WORD_COMMAND.length()), 1);
+            }
+            if (lowerCaseText.endsWith(DELETE_TWO_WORDS_COMMAND))
+            {
+                return deleteLastWords(text.substring(0, text.length() - DELETE_WORD_COMMAND.length()), 2);
+            }
+            if (lowerCaseText.endsWith(DELETE_THREE_WORDS_COMMAND))
+            {
+                return deleteLastWords(text.substring(0, text.length() - DELETE_WORD_COMMAND.length()), 3);
             }
 
             if (lowerCaseText.endsWith(DELETE_SENTENCE_COMMAND))
