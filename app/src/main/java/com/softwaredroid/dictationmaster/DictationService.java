@@ -103,17 +103,23 @@ public class DictationService extends AccessibilityService implements IDictation
                         CharSequence text = source.getText(); // Extract the text
                         if (text != null)
                         {
-                            String newText = textManipulator.searchAndApplyCommands(text.toString());
-                            if (newText != null)
+                            TextManipulator.CommandResult command = textManipulator.searchAndApplyCommands(text.toString());
+                            if (command != null)
                             {
                                 new Handler(Looper.getMainLooper()).post(() -> {
                                     if (source.isEditable())
                                     {
-                                        Bundle arguments = new Bundle();
-                                        arguments.putCharSequence(AccessibilityNodeInfo
-                                                .ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, newText);
-                                        source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
-                                        this.clickOnGoardMic();
+                                        if (command.newText != null)
+                                        {
+                                            Bundle arguments = new Bundle();
+                                            arguments.putCharSequence(AccessibilityNodeInfo
+                                                    .ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, command.newText);
+                                            source.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
+                                        }
+                                        if (command.continueMicInput)
+                                        {
+                                            this.clickOnGoardMic();
+                                        }
                                     }
                                 });
                             }
@@ -121,40 +127,8 @@ public class DictationService extends AccessibilityService implements IDictation
                     }
                     break;
                 }
-                case AccessibilityEvent.TYPE_VIEW_CLICKED:
-                {
-                    AccessibilityNodeInfo source = event.getSource();
-                    if (source != null)
-                    {
-                        // Get the button's ID
-                        String buttonId = String.valueOf(source.getViewIdResourceName());
-                        // Get the button's content description
-                        CharSequence contentDescription = source.getContentDescription();
-
-                        // Get the button's text
-                        CharSequence buttonText = source.getText();
-
-                        // Log or store the button information
-                    }
-                    break;
-                }
                 default:
                     break;
-//                case AccessibilityEvent.TYPE_VIEW_FOCUSED:
-//                    // This event is triggered when a view gains focus
-//                    AccessibilityNodeInfo focusedSource = event.getSource();
-//                    if (focusedSource != null)
-//                    {
-//                        CharSequence focusedText = focusedSource.getText(); // Extract the text if available
-//                        if (focusedText != null)
-//                        {
-//                            // Handle the focused text
-//                            Log.d("AccessibilityService", "Focused text: " + focusedText.toString());
-//                        }
-//                    }
-//                    break;
-
-                // Handle other event types as needed
             }
         }
     }

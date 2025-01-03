@@ -5,7 +5,7 @@ import android.content.Context;
 public class TextManipulator
 {
     private boolean enabled = true;
-    public String TURN_ON_OFF_COMMAND = "Sakura";
+    public String TURN_ON_OFF_COMMAND = "Nana";
     public String DELETE_WORD_COMMAND = "lösche wort";
     public String DELETE_TWO_WORDS_COMMAND = "lösche zwei wörter";
     public String DELETE_THREE_WORDS_COMMAND = "lösche drei wörter";
@@ -13,6 +13,18 @@ public class TextManipulator
     private IDictationService service;
     private Context context;
     private boolean autoStartKeyboardIfAwake = true;
+
+    public class CommandResult
+    {
+        public CommandResult(String text, boolean continueMicInput)
+        {
+            this.newText = text;
+            this.continueMicInput = continueMicInput;
+        }
+
+        public String newText;
+        public boolean continueMicInput = true;
+    }
 
     public boolean isEnabled()
     {
@@ -31,36 +43,40 @@ public class TextManipulator
         this.context = context;
     }
 
-    public String searchAndApplyCommands(String text)
+    public CommandResult searchAndApplyCommands(String text)
     {
         String lowerCaseText = text.toLowerCase();
-        if (text.endsWith(TURN_ON_OFF_COMMAND))
+        // GBoard add sometimes a space for the text word
+        for (String turnOffCommand : new String[]{TURN_ON_OFF_COMMAND, TURN_ON_OFF_COMMAND + " "})
         {
-            setActivationState(!enabled);
-            service.showNotification(enabled ? context.getString(R.string.sakura_awake) : context.getString(R.string.sakura_sleeps_now));
-            // remove entered commands
-
-            return text.substring(0, text.length() - TURN_ON_OFF_COMMAND.length());
+            // compare with real text to respect case sentive
+            if (text.endsWith(turnOffCommand))
+            {
+                setActivationState(!enabled);
+                service.showNotification(enabled ? context.getString(R.string.sakura_awake) : context.getString(R.string.sakura_sleeps_now));
+                // remove entered commands
+                return new CommandResult(text.substring(0, text.length() - turnOffCommand.length()), enabled);
+            }
         }
 
         if (enabled)
         {
             if (lowerCaseText.endsWith(DELETE_WORD_COMMAND))
             {
-                return deleteLastWords(text.substring(0, text.length() - DELETE_WORD_COMMAND.length()), 1);
+                return new CommandResult(deleteLastWords(text.substring(0, text.length() - DELETE_WORD_COMMAND.length()), 1), true);
             }
             if (lowerCaseText.endsWith(DELETE_TWO_WORDS_COMMAND))
             {
-                return deleteLastWords(text.substring(0, text.length() - DELETE_WORD_COMMAND.length()), 2);
+                return new CommandResult(deleteLastWords(text.substring(0, text.length() - DELETE_WORD_COMMAND.length()), 2), true);
             }
             if (lowerCaseText.endsWith(DELETE_THREE_WORDS_COMMAND))
             {
-                return deleteLastWords(text.substring(0, text.length() - DELETE_WORD_COMMAND.length()), 3);
+                return new CommandResult(deleteLastWords(text.substring(0, text.length() - DELETE_WORD_COMMAND.length()), 3), true);
             }
 
             if (lowerCaseText.endsWith(DELETE_SENTENCE_COMMAND))
             {
-                return deleteLastSentence(text);
+                return new CommandResult(deleteLastSentence(text), true);
             }
         }
         return null;
