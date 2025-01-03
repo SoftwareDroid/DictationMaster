@@ -67,9 +67,9 @@ public class DictationService extends AccessibilityService implements IDictation
         CharSequence app = event.getPackageName();
         if (app != null && (worksInAnyApp || appliedApps.contains(app.toString())))
         {
-            if (app.toString().equals("com.google.android.inputmethod.latin"))
+                        if (app.toString().equals("com.google.android.inputmethod.latin"))
             {
-                if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
+                /*if (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED)
                 {
                     String text = event.getText().toString();
                     if (text.equals("[Spracheingabe beendet]") && textManipulator.isEnabled())
@@ -89,7 +89,7 @@ public class DictationService extends AccessibilityService implements IDictation
                         clickOnGoardMic();
                     }
 
-                }
+                }*/
             }
 
             switch (event.getEventType())
@@ -118,7 +118,7 @@ public class DictationService extends AccessibilityService implements IDictation
                                         }
                                         if (command.continueMicInput)
                                         {
-                                            this.clickOnGoardMic();
+//                                            this.clickOnGoardMic();
                                         }
                                     }
                                 });
